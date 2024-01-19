@@ -1,0 +1,43 @@
+html {
+  font-size: 24px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+}
+
+body {
+  margin: 0;
+  padding: 1rem 1.5rem 0;
+}
+
+button {
+  padding: 0.8rem;
+  border-radius: 0.3rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: white;
+  background-color: #f97316;
+  border-color: transparent;
+}
+
+button:hover {
+  background-color: #f79148;
+  transition-duration: 500ms;
+}
+
+label {
+  font-size: 1.5rem;
+}
+
+input {
+  font-size: 1.5rem;
+  display: flex;
+  border-radius: 0.3rem;
+  padding-left: 0.5rem;
+  border: 3px solid #f79148;
+  display: flex;
+  width: 100%;
+}
+
+input:focus {
+  outline: 3px solid #f79148;
+}
