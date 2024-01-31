@@ -1,5 +1,5 @@
 import { ethers } from "./ethers-5.2.esm.min.js";
-import { abi, contractAddress } from "./constants.js";
+import { abi, contractAddress, ownerAddress } from "./constants.js";
 
 const connectButton = document.getElementById("connectButton");
 const fundButton = document.getElementById("fundButton");
@@ -22,7 +22,6 @@ async function connect() {
     console.log(accounts);
   } else {
     alert("No Metamask detected!");
-    connectButton.innerHTML = "Install Metamask";
   }
 }
 
@@ -30,12 +29,30 @@ async function getBalance() {
   if (typeof window.ethereum != "undefined") {
     const provider = new ethers.providers.Web3Provider(window.ethereum); // Metamask Wallet
     const balance = await provider.getBalance(contractAddress); // Balance of contract
-    console.log(ethers.utils.formatEther(balance));
+    const formattedBalance = ethers.utils.formatEther(balance);
+    console.log(`Balance: ${formattedBalance}`);
+    alert(`Balance: ${formattedBalance}`);
   }
 }
 
 async function fund() {
   const ethAmount = document.getElementById("ethAmount").value;
+
+  // Checking if the user is connected to Metamask!
+  const accounts = await ethereum.request({ method: "eth_accounts" });
+  if (accounts.length < 1) {
+    console.log("Please Connect");
+    alert("Please Connect");
+    return;
+  }
+
+  // Checking if the ethAmount is blank
+  if (!ethAmount) {
+    alert("Please enter the funding amount");
+    console.log("Please enter the funding amount");
+    return;
+  }
+
   console.log(`Funding with ${ethAmount}...`);
   if (typeof window.ethereum != "undefined") {
     // provider / connection to the blockchain
@@ -54,6 +71,7 @@ async function fund() {
       console.log("Done!");
     } catch (error) {
       console.log(error);
+      alert(error.error.message);
     }
   }
 }
@@ -65,6 +83,7 @@ function listenForTransactionMine(transactionResponse, provider) {
     try {
       provider.once(transactionResponse.hash, (transactionReceipt) => {
         console.log(`Completed with ${transactionReceipt.confirmations} confirmations`);
+        alert(`Completed with ${transactionReceipt.confirmations} confirmations`);
         resolve();
       });
     } catch (error) {
@@ -79,6 +98,25 @@ async function withdraw() {
     const provider = new ethers.providers.Web3Provider(window.ethereum); // Metamask Wallet
     const signer = provider.getSigner(); // Connected account from Metamask Wallet
     const contract = new ethers.Contract(contractAddress, abi, signer);
+
+    // Checking if the user is connected to Metamask!
+    const accounts = await ethereum.request({ method: "eth_accounts" });
+    if (accounts.length < 1) {
+      console.log("Please Connect");
+      alert("Please Connect");
+      return;
+    }
+
+    // Checking if the user is the owner!
+    const signerAddress = await signer.getAddress();
+    if (signerAddress !== ownerAddress) {
+      console.log(`signerAddress: ${signerAddress}`);
+      console.log(`ownerAddress: ${ownerAddress}`);
+      console.log("Only the owner of the contract can withdraw funds");
+      alert("Only the owner of the contract can withdraw funds");
+      return;
+    }
+
     try {
       const transactionResponse = await contract.withdraw();
       await listenForTransactionMine(transactionResponse, provider);
