@@ -17,15 +17,22 @@ async function connect() {
     } catch (error) {
       console.log(error);
     }
-    connectButton.innerHTML = "Connected";
     const accounts = await ethereum.request({ method: "eth_accounts" });
-    console.log(accounts);
+    if (accounts.length > 0) {
+      connectButton.innerHTML = "Connected";
+    }
   } else {
     alert("No Metamask detected!");
   }
 }
 
 async function getBalance() {
+  // Checking if metamask is installed
+  if (typeof window.ethereum == "undefined") {
+    alert("No Metamask detected!");
+    return;
+  }
+
   if (typeof window.ethereum != "undefined") {
     const provider = new ethers.providers.Web3Provider(window.ethereum); // Metamask Wallet
     const balance = await provider.getBalance(contractAddress); // Balance of contract
@@ -36,7 +43,11 @@ async function getBalance() {
 }
 
 async function fund() {
-  const ethAmount = document.getElementById("ethAmount").value;
+  // Checking if metamask is installed
+  if (typeof window.ethereum == "undefined") {
+    alert("No Metamask detected!");
+    return;
+  }
 
   // Checking if the user is connected to Metamask!
   const accounts = await ethereum.request({ method: "eth_accounts" });
@@ -45,6 +56,8 @@ async function fund() {
     alert("Please Connect");
     return;
   }
+
+  const ethAmount = document.getElementById("ethAmount").value;
 
   // Checking if the ethAmount is blank
   if (!ethAmount) {
@@ -93,6 +106,12 @@ function listenForTransactionMine(transactionResponse, provider) {
 }
 
 async function withdraw() {
+  // Checking if metamask is installed
+  if (typeof window.ethereum == "undefined") {
+    alert("No Metamask detected!");
+    return;
+  }
+
   console.log("Withdrawing...");
   if (typeof window.ethereum != "undefined") {
     const provider = new ethers.providers.Web3Provider(window.ethereum); // Metamask Wallet
@@ -112,8 +131,8 @@ async function withdraw() {
     if (signerAddress !== ownerAddress) {
       console.log(`signerAddress: ${signerAddress}`);
       console.log(`ownerAddress: ${ownerAddress}`);
-      console.log("Only the owner of the contract can withdraw funds");
-      alert("Only the owner of the contract can withdraw funds");
+      console.log("Only the owner of this contract can withdraw funds");
+      alert("Only the owner of this contract can withdraw funds");
       return;
     }
 
